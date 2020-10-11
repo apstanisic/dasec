@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  cache:
+    image: redis:5-alpine
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+
+  # Database
+  db:
+    image: postgres:13-alpine
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql/data
+  # caddy:
+  #   image: caddy:2-alpine
+  #   ports:
+  #     - '80:80'
+  #     - '443:443'
+  #   volumes:
+  #     - ./volumes/caddy/data:/data
+  # - ./caddy-config:/config
+  # - ./caddy-config/Caddyfile:/etc/caddy/Caddyfile
