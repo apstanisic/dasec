@@ -103,6 +103,10 @@ dist
 # TernJS port file
 .tern-port
 
-# Custom
+###  Custom
+# Docker volumes
 volumes/
+# Directus default file upload directory
 uploads/
+# It's used for types because Directus does not export types
+next/

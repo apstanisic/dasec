@@ -12,6 +12,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string("short_description").notNullable().defaultTo("");
     table.integer("regular_price").notNullable().index();
     table.integer("discount_price").nullable();
+    table.dateTime("discounted_from").nullable();
     table.dateTime("discounted_until").nullable();
     table.integer("quantity").nullable();
     table.integer("weight");
