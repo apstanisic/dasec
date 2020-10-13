@@ -21,6 +21,8 @@ export async function up(knex: Knex): Promise<void> {
     t.string("shipping_city");
     t.string("shipping_country");
     t.integer("shipping_price");
+    t.text("user_additional_info");
+    // t.integer("items_price").notNullable();
     // Not used currently
     t.uuid("transaction_id").nullable();
   });

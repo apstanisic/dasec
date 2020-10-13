@@ -12,3 +12,8 @@
 
 GPLv3 is temporary, because no one should use this code in production, I'll switch to more permissive
 licence when things start to work
+
+# Directus missing features
+
+- ItemsService generics
+- ItemsService.prototype.readbyQuery can return Record, why?

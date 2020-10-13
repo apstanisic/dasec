@@ -6,7 +6,7 @@ const tableName = "ds_order_status";
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(tableName, (table) => {
     commonColumns(knex, table);
-    table.string("name").notNullable();
+    table.string("name").notNullable().index();
   });
 }
 
