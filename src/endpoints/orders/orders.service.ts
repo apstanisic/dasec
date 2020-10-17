@@ -1,20 +1,23 @@
-import { ItemsService } from "../../../next/api/src/services";
-import { EndpointContext } from "../../types";
-import { CartItem } from "../cart/cart-item.entity";
-import { CoreService } from "../core/core.service";
-import { Struct } from "../core/types";
-import { OrderStatus } from "../order-status/order-status.interface";
-import { ProductItem } from "../product-items/product-item.interface";
-import { addressValidator } from "./new-order.dto";
-import { OrderItem } from "./order-item.interface";
-import { Order } from "./order.interface";
+import { ItemsService } from 'directus/dist/services';
+import { ExtensionContext } from 'directus/dist/types';
+import { Request } from 'express';
+import { CartItem } from '../cart/cart-item.interface';
+import { DataService } from '../core/data.service';
+import { Struct } from '../core/types';
+import { OrderStatus } from '../order-status/order-status.interface';
+import { ProductItem } from '../product-items/product-item.interface';
+import { addressValidator } from './new-order.dto';
+import { OrderItem } from './order-item.interface';
+import { Order } from './order.interface';
 
-export class OrdersService extends CoreService {
-  private orderStatusRepo = new ItemsService("ds_order_status");
-  private orderItemsRepo = new ItemsService("ds_order_items");
-  private cartItemsRepo = new ItemsService("ds_cart_items");
-  constructor(ctx: EndpointContext) {
-    super(ctx, "ds_orders");
+export class OrdersService extends DataService<Order> {
+  private orderStatusRepo = new DataService<OrderStatus>('ds_order_status', this.getConParams());
+  private orderItemsRepo = new DataService<OrderItem>('ds_order_items', this.getConParams());
+  private cartItemsRepo = new DataService<CartItem>('ds_cart_items', this.getConParams());
+
+  table = 'ds_orders';
+  constructor(req: Request, ctx: ExtensionContext) {
+    super('ds_orders', { req, ctx });
   }
 
   /**
@@ -26,13 +29,13 @@ export class OrdersService extends CoreService {
    * @param body Request body
    */
   async createOrderFromCart(body: Struct): Promise<Order> {
-    const userId = this.checkAuth();
+    const userId = this.userId;
     // User should pass address, address in db are there only as a helper
     const params = this.validatePayload(body, addressValidator);
-
-    const status = (await this.orderStatusRepo.readSingleton({
-      filter: { name: "pending" },
-    })) as OrderStatus;
+    const status = await this.orderStatusRepo.findOne({
+      filter: { name: 'pending' },
+    });
+    if (!status) throw new this.exceptions.RouteNotFoundException('');
 
     // @todo Add shipping prices
     const order: Partial<Order> = {
@@ -40,20 +43,19 @@ export class OrdersService extends CoreService {
       ordered_at: new Date(),
       status_id: status.id,
       shipping_price: 0,
-      // Will be replaced when items are added
-      //   items_price: -1,
     };
 
-    const orderId = await this.repository.create(order);
+    // const orderId = await this.items.create(order);
+    const savedOrder = await this.createItem(order);
 
-    const cartItems = (await this.cartItemsRepo.readByQuery({
+    const cartItems = await this.cartItemsRepo.find({
       filter: { user_id: userId },
-      // @todo Join with product
-      deep: {},
-    })) as CartItem[];
+      fields: ['*', 'product_item_id.*'],
+    });
 
     const orderItems = cartItems.map((cartItem) => {
-      const product = cartItem.product_item_id as ProductItem;
+      if (typeof cartItem.product_item_id === 'string') throw new Error();
+      const product = cartItem.product_item_id;
       const singlePrice = product.discount_price ?? product.regular_price;
       const orderItem: Partial<OrderItem> = {
         discount: 0,
@@ -61,16 +63,12 @@ export class OrdersService extends CoreService {
         single_price: singlePrice,
         total_price: cartItem.quantity * singlePrice,
         product_item_id: product.id,
-        order_id: orderId,
+        order_id: savedOrder.id,
       };
       return orderItem;
     });
-    const savedOrderItems = await this.orderItemsRepo.create(orderItems);
-    order.items = savedOrderItems;
-    const savedOrder = (await this.repository.readSingleton({
-      filter: { id: orderId },
-      // join items
-    })) as Order;
+    const savedOrderItems = await this.orderItemsRepo.createItems(orderItems);
+    savedOrder.items = savedOrderItems;
     return savedOrder;
     // order.this.repository.update({items_price: savedOrderItems.reduce(($1, $2) => $1 + $2});
   }
@@ -80,24 +78,19 @@ export class OrdersService extends CoreService {
    * @param orderId
    */
   async cancelOrder(orderId: string) {
-    const order = (await this.repository.readSingleton({
-      filter: { id: orderId },
-      // Join with order_status
-    })) as Order;
+    const order = await this.findOne(orderId);
+    if (!order) throw new this.exceptions.ForbiddenException();
 
-    const orderStatus = order.status_id as OrderStatus;
-    if (!["pending"].includes(orderStatus.name)) {
-      throw new this.ctx.exceptions.ForbiddenException("Order already sent.");
+    const allOrderStatus = await this.orderStatusRepo.find({});
+    const pending = allOrderStatus.find((os) => os.name === 'pending');
+    const canceled = allOrderStatus.find((os) => os.name === 'canceled');
+    if (!pending || !canceled) throw new this.exceptions.ForbiddenException();
+
+    if (order?.status_id === pending.id) {
+      throw new this.ctx.exceptions.ForbiddenException('Order already sent.');
     }
 
-    const cancelStatus = (await this.orderStatusRepo.readSingleton({
-      filter: { name: "canceled" },
-    })) as OrderStatus;
-
-    const updatedOrder = await this.repository.update(
-      { status_id: cancelStatus.id },
-      order.id
-    );
+    const updatedOrder = await this.updateById(order.id, { status_id: canceled.id });
     return updatedOrder;
   }
 }

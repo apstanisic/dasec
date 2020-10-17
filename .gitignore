@@ -108,5 +108,3 @@ dist
 volumes/
 # Directus default file upload directory
 uploads/
-# It's used for types because Directus does not export types
-next/

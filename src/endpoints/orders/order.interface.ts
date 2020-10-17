@@ -1,6 +1,6 @@
-import { PrimaryKey } from "../../../next/api/src/types";
-import { OrderStatus } from "../order-status/order-status.interface";
-import { OrderItem } from "./order-item.interface";
+import { PrimaryKey } from 'directus/dist/types';
+import { OrderStatus } from '../order-status/order-status.interface';
+import { OrderItem } from './order-item.interface';
 
 export interface Order {
   id: string;
@@ -11,7 +11,7 @@ export interface Order {
   shipped_at?: Date;
   paid_at?: Date;
   delivered_at?: Date;
-  status_id?: string | OrderStatus;
+  status_id: string | OrderStatus;
   order_address: string;
   order_city: string;
   order_postal_code: string;

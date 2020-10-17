@@ -5,5 +5,3 @@ export interface CommonFields {
   created_at: string | Date;
   updated_at: string | Date;
 }
-
-export type PrimaryKey = string | number;
