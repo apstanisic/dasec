@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi from 'joi';
 
 export const addressValidator = Joi.object<{
   order_address: string;
@@ -9,7 +9,7 @@ export const addressValidator = Joi.object<{
   shipping_postal_code: string;
   shipping_city: string;
   shipping_country: string;
-  user_additional_info: string;
+  user_comment: string;
 }>({
   order_address: Joi.string().required().max(200),
   order_city: Joi.string().required().max(200),
@@ -19,5 +19,5 @@ export const addressValidator = Joi.object<{
   shipping_postal_code: Joi.string().required().max(200),
   shipping_city: Joi.string().required().max(200),
   shipping_country: Joi.string().required().max(200),
-  user_additional_info: Joi.string().max(1000),
+  user_comment: Joi.string().max(1000),
 });

@@ -11,10 +11,6 @@ import { Request } from 'express';
  * that have better return values, support generics...
  */
 export class DataService<T extends Struct = Struct> {
-  // /**
-  //  * Table name
-  //  */
-  // private table: string
   /**
    * Used for accessing data
    */
@@ -62,7 +58,7 @@ export class DataService<T extends Struct = Struct> {
    * This always returns array, and supports generics
    * @param query Directus query object
    */
-  async find(query: Query): Promise<T[]> {
+  async find(query: Query = {}): Promise<T[]> {
     const res = await this.items.readByQuery({ ...query, single: false });
     if (!Array.isArray(res)) throw new Error('Internal Error');
     return res as T[];
@@ -86,6 +82,12 @@ export class DataService<T extends Struct = Struct> {
     const values = await this.items.readByKey(ids);
     if (!values) throw new this.exceptions.ForbiddenException();
     return values as T[];
+  }
+
+  async findOneOrFail(queryOrId: Query | PrimaryKey): Promise<T> {
+    const res = await this.findOne(queryOrId);
+    if (!res) throw new this.exceptions.RouteNotFoundException('');
+    return res;
   }
 
   /**

@@ -1,11 +1,9 @@
-import { ItemsService } from 'directus/dist/services';
 import { ExtensionContext } from 'directus/dist/types';
 import { Request } from 'express';
 import { CartItem } from '../cart/cart-item.interface';
 import { DataService } from '../core/data.service';
 import { Struct } from '../core/types';
-import { OrderStatus } from '../order-status/order-status.interface';
-import { ProductItem } from '../product-items/product-item.interface';
+import { OrderStatus, OrderStatusValues } from '../order-status/order-status.interface';
 import { addressValidator } from './new-order.dto';
 import { OrderItem } from './order-item.interface';
 import { Order } from './order.interface';
@@ -15,7 +13,6 @@ export class OrdersService extends DataService<Order> {
   private orderItemsRepo = new DataService<OrderItem>('ds_order_items', this.getConParams());
   private cartItemsRepo = new DataService<CartItem>('ds_cart_items', this.getConParams());
 
-  table = 'ds_orders';
   constructor(req: Request, ctx: ExtensionContext) {
     super('ds_orders', { req, ctx });
   }
@@ -32,10 +29,9 @@ export class OrdersService extends DataService<Order> {
     const userId = this.userId;
     // User should pass address, address in db are there only as a helper
     const params = this.validatePayload(body, addressValidator);
-    const status = await this.orderStatusRepo.findOne({
+    const status = await this.orderStatusRepo.findOneOrFail({
       filter: { name: 'pending' },
     });
-    if (!status) throw new this.exceptions.RouteNotFoundException('');
 
     // @todo Add shipping prices
     const order: Partial<Order> = {
@@ -78,16 +74,15 @@ export class OrdersService extends DataService<Order> {
    * @param orderId
    */
   async cancelOrder(orderId: string) {
-    const order = await this.findOne(orderId);
-    if (!order) throw new this.exceptions.ForbiddenException();
+    const order = await this.findOneOrFail(orderId);
 
-    const allOrderStatus = await this.orderStatusRepo.find({});
-    const pending = allOrderStatus.find((os) => os.name === 'pending');
-    const canceled = allOrderStatus.find((os) => os.name === 'canceled');
+    const allOrderStatus = await this.orderStatusRepo.find();
+    const pending = allOrderStatus.find((os) => os.name === OrderStatusValues.pending);
+    const canceled = allOrderStatus.find((os) => os.name === OrderStatusValues.cancelled);
     if (!pending || !canceled) throw new this.exceptions.ForbiddenException();
 
-    if (order?.status_id === pending.id) {
-      throw new this.ctx.exceptions.ForbiddenException('Order already sent.');
+    if (order.status_id !== pending.id) {
+      throw new this.ctx.exceptions.ForbiddenException("It's to late to cancel order.");
     }
 
     const updatedOrder = await this.updateById(order.id, { status_id: canceled.id });

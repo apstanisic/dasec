@@ -24,6 +24,7 @@ export interface Order {
   //   items_price: number;
   // Not used currently
   transaction_id?: string;
+  user_comment: string;
 
   items?: OrderItem[] | PrimaryKey[];
 }

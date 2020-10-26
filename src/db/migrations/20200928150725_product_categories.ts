@@ -1,19 +1,15 @@
-import * as Knex from "knex";
-import { commonColumns } from "../common_columns";
+import * as Knex from 'knex';
+import { commonColumns } from '../common_columns';
 
-const tableName = "ds_product_categories";
+const tableName = 'ds_product_categories';
 
 /** Product categories */
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(tableName, (table) => {
     commonColumns(knex, table);
-    table.string("name").notNullable();
+    table.string('name').notNullable().index();
     // parent category
-    table
-      .uuid("parent_id")
-      .references("id")
-      .inTable(tableName)
-      .onDelete("SET NULL");
+    table.uuid('parent_id').references('id').inTable(tableName).onDelete('SET NULL');
   });
 }
 

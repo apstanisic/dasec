@@ -3,12 +3,12 @@ export interface OrderStatus {
   name: string;
 }
 
-const values = [
-  "pending",
-  "processing",
-  "failed",
-  "cancelled",
-  "completed",
-  "shipped",
-  "sent",
-];
+export enum OrderStatusValues {
+  pending = 'pending',
+  processing = 'processing',
+  failed = 'failed',
+  cancelled = 'cancelled',
+  completed = 'completed',
+  shipped = 'shipped',
+  sent = 'sent',
+}

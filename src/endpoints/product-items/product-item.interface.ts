@@ -1,4 +1,4 @@
-import { CommonFields } from "../core/types";
+import { CommonFields } from '../core/types';
 
 export interface ProductItem extends CommonFields {
   sku: string;
