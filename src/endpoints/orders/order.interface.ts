@@ -1,4 +1,4 @@
-import { PrimaryKey } from 'directus/dist/types';
+import type { PrimaryKey } from 'directus/dist/types';
 import { OrderStatus } from '../order-status/order-status.interface';
 import { OrderItem } from './order-item.interface';
 

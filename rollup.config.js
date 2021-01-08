@@ -9,5 +9,10 @@ export default {
     file: 'extensions/endpoints/dasec/index.js',
     format: 'cjs',
   },
-  plugins: [typescript(), commonjs({ extensions: ['.js', '.ts'] })],
+  plugins: [
+    json(),
+    typescript(),
+    // nodeResolve(),
+    commonjs({ extensions: ['.js', '.ts'] }),
+  ],
 };

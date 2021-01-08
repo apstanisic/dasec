@@ -1,4 +1,4 @@
-import { ExtensionContext } from 'directus/dist/types';
+import type { ExtensionContext } from 'directus/dist/types';
 import { Router } from 'express';
 import { cartController } from './cart/cart.controller';
 import { ordersController } from './orders/orders.controller';

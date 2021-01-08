@@ -1,6 +1,6 @@
-import { AuthenticationService, ItemsService } from 'directus/dist/services';
-import { ExtensionContext, PrimaryKey, Query } from 'directus/dist/types';
-import * as Exceptions from 'directus/dist/exceptions';
+import type { AuthenticationService, ItemsService } from 'directus/dist/services';
+import type { ExtensionContext, PrimaryKey, Query } from 'directus/dist/types';
+import type Exceptions from 'directus/dist/exceptions';
 import Joi from 'joi';
 import { Struct } from './types';
 import { Request } from 'express';
@@ -39,8 +39,8 @@ export class DataService<T extends Struct = Struct> {
     this.req = params.req;
 
     // It can't accept acc on Record?
-    const accountability = (params.req as any).accountability ?? null;
-    this.items = new ItemsService(table, { accountability });
+    const accountability = (params.req as any)?.accountability ?? null;
+    this.items = new this.ctx.services.ItemsService(table, { accountability });
     this.auth = new this.ctx.services.AuthenticationService({ accountability });
     this.exceptions = this.ctx.exceptions;
   }

@@ -1,15 +1,16 @@
-import * as Knex from "knex";
-import { commonColumns } from "../common_columns";
+import * as Knex from 'knex';
+import { commonColumns } from '../common_columns';
 
-const tableName = "ds_buyer_addresses";
+const tableName = 'ds_buyer_addresses';
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(tableName, (table) => {
     commonColumns(knex, table);
-    table.string("address").notNullable();
-    table.string("city").notNullable();
-    table.string("postal_code").notNullable();
-    table.string("country").notNullable();
+    table.string('address').notNullable();
+    table.string('city').notNullable();
+    table.string('postal_code').notNullable();
+    table.string('country').notNullable();
+    table.uuid('user_id').references('id').inTable('directus_users').onDelete('CASCADE');
   });
 }
 

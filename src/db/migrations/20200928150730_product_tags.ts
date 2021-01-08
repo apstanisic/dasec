@@ -8,6 +8,7 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(tableName, (table) => {
     commonColumns(knex, table);
     table.string('name').notNullable().index();
+    table.text('description').defaultTo('');
   });
 }
 

@@ -1,4 +1,4 @@
-import { ExtensionContext } from 'directus/dist/types';
+import type { ExtensionContext } from 'directus/dist/types';
 import { Request } from 'express';
 import { CartItem } from '../cart/cart-item.interface';
 import { DataService } from '../core/data.service';

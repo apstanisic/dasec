@@ -1,4 +1,4 @@
-import { ExtensionContext } from 'directus/dist/types';
+import type { ExtensionContext } from 'directus/dist/types';
 import { Request, Router } from 'express';
 import { OrdersService } from './orders.service';
 

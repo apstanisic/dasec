@@ -10,6 +10,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('name').notNullable().index();
     // parent category
     table.uuid('parent_id').references('id').inTable(tableName).onDelete('SET NULL');
+    table.text('description').defaultTo('');
   });
 }
 

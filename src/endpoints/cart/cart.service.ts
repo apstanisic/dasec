@@ -1,4 +1,4 @@
-import { ExtensionContext, PrimaryKey } from 'directus/dist/types';
+import type { ExtensionContext, PrimaryKey } from 'directus/dist/types';
 import { Request } from 'express';
 import Joi from 'joi';
 import { DataService } from '../core/data.service';
